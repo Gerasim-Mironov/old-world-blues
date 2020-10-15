@@ -1,4 +1,5 @@
 ﻿#include"To_Do.hpp"
+#include"Singleton.hpp"
 #include<conio.h>
 
 extern std::string getchCin(std::string mz)
@@ -25,5 +26,6 @@ int main()
 	setlocale(0, "");
 #pragma endregion
 	
+
 	return 0xd;
 }

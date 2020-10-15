@@ -145,6 +145,9 @@
   <ItemGroup>
     <ClInclude Include="To_Do.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="patternsExam.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
