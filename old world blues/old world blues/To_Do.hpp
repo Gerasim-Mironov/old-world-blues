@@ -4,14 +4,14 @@
 #include<queue>
 #include<fstream>
 
-
+typedef std::string Msg;
 
 class To_DoNode
 {
 private:
 	std::string title;
 	std::string tag;
-	std::string desc;
+	Msg desc;
 	std::string date;
 
 	std::string cherry;
@@ -35,7 +35,7 @@ public:
 
 		cherry = "";
 	}
-	To_DoNode(std::string title, std::string type, std::string desc, std::string date)
+	To_DoNode(std::string title, std::string type, Msg desc, std::string date)
 	{
 		this->title = title;
 		this->tag = type;
@@ -45,7 +45,7 @@ public:
 		cherry = getFilePath();
 	}
 
-	bool setNode(std::string title, std::string type, std::string desc, std::string date)noexcept
+	bool setNode(std::string title, std::string type, Msg desc, std::string date)noexcept
 	{
 		this->title = title;
 		this->tag = type;
@@ -71,10 +71,41 @@ public:
 
 		osw.close();
 	}
+	void loadNode(std::string route)
+	{
+		std::ifstream is;
+		is.open(route);
+
+		int mtd = 0;
+		Msg data = "";
+		while (!is.eof())
+		{ 
+			data = "";
+
+			std::getline(is, data);
+			if (mtd == 0)
+			{
+				title = data;
+			}
+			else if (mtd == 1)
+			{
+				tag = data;
+			}
+			else if (mtd == 2)
+			{
+				date = data;
+			}
+			else
+			{
+				desc = data;
+			}
+		}
+		is.close();
+	}
 	void beatIt()
 	{
 		std::ofstream osw(cherry, std::ios_base::app);
-		osw << title <<"       (finished)                                      ";
+		osw << title <<"\0\0\0\0\0\0\0\(finished)\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 		osw.close();
 	}
 	bool displayNode()noexcept
@@ -82,7 +113,7 @@ public:
 		std::ifstream is(cherry);
 		while (!is.eof())
 		{
-			std::string data = "";
+			Msg data = "";
 			std::getline(is, data);
 			std::cout << data;
 		}
@@ -97,10 +128,36 @@ private:
 	static To_DoList* instance;
 	std::queue<To_DoNode> tasks;
 
-	To_DoList() {}
+	To_DoList()
+	{
+		loadList();
+	}
 	To_DoList(const To_DoList*) = delete;
 
 	To_DoList& operator=(const To_DoList*) = delete;
+
+	void loadList()
+	{
+		std::ifstream is;
+		is.open("fileRoutes.txt");
+		Msg data = "";
+
+		To_DoNode nge;
+		while (!is.eof())
+		{
+			data = "";
+			std::getline(is, data);
+
+			if (data != "")
+			{
+				To_DoNode nge;
+				nge.loadNode(data);
+				tasks.push(nge);
+			}
+			else
+				break;
+		}
+	}
 
 	~To_DoList() {}
 public:
