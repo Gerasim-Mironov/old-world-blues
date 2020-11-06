@@ -1,10 +1,11 @@
 #pragma once
 #include<iostream>
 #include<string>
-#include<queue>
+#include<list>
 #include<fstream>
 
 typedef std::string Msg;
+
 
 class To_DoNode
 {
@@ -120,21 +121,107 @@ public:
 
 		return true;
 	}
+	/*std::ostream operator <<(std::ostream os)
+	{
+		os << title << " (on run)\n";
+		os << tag << "\n";
+		os << "finish until: " << date << "\n";
+		os << desc << "\n";
+
+		return os;
+	}*/
+
+	std::string getTitle()
+	{
+		return title;
+	}
+	std::string getTag()
+	{
+		return tag;
+	}
+	std::string getDate()
+	{
+		return date;
+	}
 };
 
 class To_DoList
 {
 private:
 	static To_DoList* instance;
-	std::queue<To_DoNode> tasks;
+	To_DoNode* tasks;
+	int mtd;
 
 	To_DoList()
 	{
 		loadList();
+		mainMenu();
+	}
+	void mainMenu()
+	{
+	    std::cout << "1-> показать все дела\n2-> создать дело\n3->закрыть дело\n4-> найти дело\n5-> уйти\n(не жмите Enter после нажати€ цифры)\n";
+		char sym = _getch();
+		switch (sym)
+		{
+		case '1':
+		{
+			for (int i = 0; i < mtd; i++)
+			{
+				tasks[i].displayNode();
+			}
+			system("pause");
+		}break;
+		case '2':
+		{
+			system("cls");
+			std::cout << "название: ";
+			std::string title = "";
+			getline(std::cin, title);
+			std::cout << "метки: ";
+			std::string tag = "";
+			getline(std::cin, tag);
+			std::cout << "описание: ";
+			Msg desc = "";
+			getline(std::cin, desc);
+			std::cout << "дата, до которой нужно сделать дело^:^ ";
+			std::string date = "";
+			getline(std::cin, date);
+
+			To_DoNode nge(title, tag, desc, date);
+			nge.saveNode();
+			expandArray(tasks, nge);
+			std::cout << "ок\n";
+			_getch();
+		}break;
+		case '3':
+		{
+			Msg seekingFor = "";
+			std::cout << "что ты ищещь?: ";
+			getline(std::cin, seekingFor);
+			Msg seekingItemType = "";
+			std::cout << "по какому €рлыку ты ищещь?: ";
+			getline(std::cin, seekingItemType);
+
+			//std::cout << seekTask(seekingFor, seekingItemType);
+		}break;
+		case '4':
+		{
+
+		}break;
+		case '5':
+		{
+			exit(0);
+		}
+		}
+
 	}
 	To_DoList(const To_DoList*) = delete;
 
 	To_DoList& operator=(const To_DoList*) = delete;
+	To_DoNode& operator[](int num)
+	{
+		return tasks[num];
+	}
 
 	void loadList()
 	{
@@ -152,11 +239,28 @@ private:
 			{
 				To_DoNode nge;
 				nge.loadNode(data);
-				tasks.push(nge);
+				expandArray(tasks, nge);
 			}
 			else
 				break;
 		}
+	}
+
+	void expandArray(To_DoNode* arr, To_DoNode node)
+	{
+		int newSize = mtd++;
+		To_DoNode* temp = new To_DoNode[newSize];
+		for (int i = 0; i < mtd; i++)
+		{
+			temp[i] = arr[i];
+		}
+		temp[newSize] = node;
+		mtd++;
+		for (int i = 0; i < newSize; i++)
+		{
+			arr[i] = temp[i];
+		}
+		delete[]temp;
 	}
 
 	~To_DoList() {}
@@ -176,4 +280,45 @@ public:
 			To_DoList::instance = nullptr;
 		}
 	}
+
+	int getSize()
+	{
+		return mtd;
+	}
+	auto seekTask(Msg seekingFor, Msg seekingItemType)
+	{
+		if (seekingItemType == "title"||seekingItemType=="Title")
+		{
+			for (int i = 0; i < mtd; i++)
+			{
+				if (tasks[i].getTitle() == seekingFor)
+				{
+					return tasks[i];
+				}
+			}
+		}
+	
+		if (seekingItemType == "tag" || seekingItemType == "Tag")
+		{
+			for (int i = 0; i < mtd; i++)
+			{
+				if (tasks[i].getTag() == seekingFor)
+				{
+					return tasks[i];
+				}
+			}
+		}
+
+		if (seekingItemType == "date" || seekingItemType == "Date")
+		{
+			for (int i = 0; i < mtd; i++)
+			{
+				if (tasks[i].getDate() == seekingFor)
+				{
+					return tasks[i];
+				}
+			}
+		}
+	}
+
 };
