@@ -31,5 +31,8 @@
     <Text Include="patternsExam.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
+    <Text Include="fileRoutes.txt" />
+    <Text Include="sports.txt" />
+    <Text Include="kamehameha.txt" />
   </ItemGroup>
 </Project>

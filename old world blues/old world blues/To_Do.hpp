@@ -1,7 +1,8 @@
 #pragma once
 #include<iostream>
 #include<string>
-#include<list>
+#include<conio.h>
+#include<vector>
 #include<fstream>
 
 typedef std::string Msg;
@@ -46,18 +47,6 @@ public:
 		cherry = getFilePath();
 	}
 
-	bool setNode(std::string title, std::string type, Msg desc, std::string date)noexcept
-	{
-		this->title = title;
-		this->tag = type;
-		this->desc = desc;
-		this->date = date;
-
-		cherry = getFilePath();
-
-		return true;
-	}
-
 	void saveNode()
 	{
 		std::ofstream os("fileRoutes.txt", std::ios_base::app);
@@ -84,52 +73,86 @@ public:
 			data = "";
 
 			std::getline(is, data);
-			if (mtd == 0)
+			if (data != "")
 			{
-				title = data;
+				if (mtd == 0)
+				{
+					title = data;
+				}
+				else if (mtd == 1)
+				{
+					tag = data;
+				}
+				else if (mtd == 2)
+				{
+					date = data;
+				}
+				else
+				{
+					desc = data;
+				}
 			}
-			else if (mtd == 1)
-			{
-				tag = data;
-			}
-			else if (mtd == 2)
-			{
-				date = data;
-			}
-			else
-			{
-				desc = data;
-			}
+			
+			mtd++;
 		}
 		is.close();
 	}
 	void beatIt()
 	{
-		std::ofstream osw(cherry, std::ios_base::app);
-		osw << title <<"\0\0\0\0\0\0\0\(finished)\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-		osw.close();
+		std::ifstream is("fileRoutes.txt");
+		std::vector<Msg> ul;
+
+		Msg data;
+		while (!is.eof())
+		{
+			data = "";
+			getline(is, data);
+			if (data != "")
+				ul.push_back(data);
+		}
+		is.close();
+
+		for (int i = 0; i<ul.size(); i++)
+		{
+			if (ul[i] == cherry)
+			{
+				ul.erase(ul.begin() + i);
+			}
+		}
+
+		std::ofstream os("fileRoutes.txt");
+		for(int i = 0; i < ul.size(); i++)
+		{
+			os << ul[i] << "\n";
+		}
+		os.close();
 	}
 	bool displayNode()noexcept
 	{
-		std::ifstream is(cherry);
-		while (!is.eof())
-		{
-			Msg data = "";
-			std::getline(is, data);
-			std::cout << data;
-		}
+		std::cout<<"//////////////////////////////////////////////////////////////////////\n";
+		std::cout << title << "\n";
+		std::cout << tag << "\n";
+		std::cout << date << "\n";
+		std::cout << desc << "\n";
 
 		return true;
 	}
-	/*std::ostream operator <<(std::ostream os)
+	/*void displayNode(To_DoNode node) no sense if it's not static
 	{
-		os << title << " (on run)\n";
-		os << tag << "\n";
-		os << "finish until: " << date << "\n";
-		os << desc << "\n";
+		std::cout << node.title<<"\n";
+		std::cout << node.tag << "\n";
+		std::cout << "finish until: " << node.date << "\n";
+		std::cout << node.desc << "\n";
+	}*/
+	friend std::ostream& operator<<(std::ostream os, To_DoNode node)
+	{
+		os << node.title << " (on run)\n";
+		os << node.tag << "\n";
+		os << "finish until: " << node.date << "\n";
+		os << node.desc << "\n";
 
 		return os;
-	}*/
+	}
 
 	std::string getTitle()
 	{
@@ -154,64 +177,88 @@ private:
 
 	To_DoList()
 	{
+		mtd = 0;
 		loadList();
 		mainMenu();
 	}
 	void mainMenu()
 	{
-	    std::cout << "1-> показать все дела\n2-> создать дело\n3->закрыть дело\n4-> найти дело\n5-> уйти\n(не жмите Enter после нажати€ цифры)\n";
-		char sym = _getch();
-		switch (sym)
+		while (true)
 		{
-		case '1':
-		{
-			for (int i = 0; i < mtd; i++)
+			std::cout << "1-> показать все дела\n2-> создать дело\n3-> закрыть дело\n4-> найти дело\n5-> уйти\n(не жмите Enter после выбора)\n";
+			char sym = _getch();
+			switch (sym)
 			{
-				tasks[i].displayNode();
+			case '1':
+			{
+				system("cls");
+				for (int i = 0; i < mtd; i++)
+				{
+					tasks[i].displayNode();
+				}
+				_getch();
+			}break;
+			case '2':
+			{
+				system("cls");
+				std::cout << "название: ";
+				std::string title = "";
+				getline(std::cin, title);
+				std::cout << "метки: ";
+				std::string tag = "";
+				getline(std::cin, tag);
+				std::cout << "описание: ";
+				Msg desc = "";
+				getline(std::cin, desc);
+				std::cout << "дата, до которой нужно сделать дело^:^ ";
+				std::string date = "";
+				getline(std::cin, date);
+
+				To_DoNode nge(title, tag, desc, date);
+				nge.saveNode();
+				expandArray(nge);
+				std::cout << "ок\n";
+				_getch();
+			}break;
+			case '3':
+			{
+				system("cls");
+				std::cout << "выбери номер дела: ";
+				for (int i = 0; i < mtd; i++)
+				{
+					const char mtd = (const char)i+48;
+					std::cout << "//" << mtd;
+				}
+				std::cout << "//\n";
+
+				char ch = _getch();
+				int unl = (int)ch - 48;
+				tasks[unl].beatIt();
+				decreaseArray(unl);
+
+				std::cout << "\n\nего практически больше не сущевствует.\n";
+				_getch();
+			}break;
+			case '4':
+			{
+				system("cls");
+
+				Msg seekingFor = "";
+				std::cout << "что ты ищещь?: ";
+				getline(std::cin, seekingFor);
+				Msg seekingItemType = "";
+				std::cout << "по какому €рлыку ты ищещь?: ";
+				getline(std::cin, seekingItemType);
+
+				seekTask(seekingFor, seekingItemType).displayNode();
+				_getch();
+			}break;
+			case '5':
+			{
+				exit(0);
 			}
-			system("pause");
-		}break;
-		case '2':
-		{
+			}
 			system("cls");
-			std::cout << "название: ";
-			std::string title = "";
-			getline(std::cin, title);
-			std::cout << "метки: ";
-			std::string tag = "";
-			getline(std::cin, tag);
-			std::cout << "описание: ";
-			Msg desc = "";
-			getline(std::cin, desc);
-			std::cout << "дата, до которой нужно сделать дело^:^ ";
-			std::string date = "";
-			getline(std::cin, date);
-
-			To_DoNode nge(title, tag, desc, date);
-			nge.saveNode();
-			expandArray(tasks, nge);
-			std::cout << "ок\n";
-			_getch();
-		}break;
-		case '3':
-		{
-			Msg seekingFor = "";
-			std::cout << "что ты ищещь?: ";
-			getline(std::cin, seekingFor);
-			Msg seekingItemType = "";
-			std::cout << "по какому €рлыку ты ищещь?: ";
-			getline(std::cin, seekingItemType);
-
-			//std::cout << seekTask(seekingFor, seekingItemType);
-		}break;
-		case '4':
-		{
-
-		}break;
-		case '5':
-		{
-			exit(0);
-		}
 		}
 
 	}
@@ -239,28 +286,80 @@ private:
 			{
 				To_DoNode nge;
 				nge.loadNode(data);
-				expandArray(tasks, nge);
+				expandArray(nge);
 			}
 			else
 				break;
 		}
 	}
 
-	void expandArray(To_DoNode* arr, To_DoNode node)
+	void expandArray(To_DoNode node)
 	{
-		int newSize = mtd++;
-		To_DoNode* temp = new To_DoNode[newSize];
+		auto temp = new To_DoNode[mtd + 1];
+		for (unsigned int i = 0; i < mtd; i++)
+			temp[i] = tasks[i];
+		temp[mtd] = node;
+		++mtd;
+		delete[]tasks;
+		tasks = temp;
+	}
+	void decreaseArray(int toKill)
+	{
+		tasks[toKill].beatIt();
+		int eclipse = mtd - 1;
+		To_DoNode* temp = new To_DoNode[eclipse];
 		for (int i = 0; i < mtd; i++)
 		{
-			temp[i] = arr[i];
+			if (i != toKill)
+			{
+				temp[i] = tasks[i];
+			}
 		}
-		temp[newSize] = node;
-		mtd++;
-		for (int i = 0; i < newSize; i++)
+
+		for (int u = 0; u < eclipse; u++)
 		{
-			arr[i] = temp[i];
+			tasks[u] = temp[u];
 		}
+		mtd--;
 		delete[]temp;
+	}
+
+	To_DoNode seekTask(Msg seekingFor, Msg seekingItemType)
+	{
+		if (seekingItemType == "title" || seekingItemType == "Title")
+		{
+			seekingFor += " (on run)";
+			for (int i = 0; i < mtd; i++)
+			{
+				if (tasks[i].getTitle() == seekingFor)
+				{
+					return tasks[i];
+				}
+			}
+		}
+
+		if (seekingItemType == "tag" || seekingItemType == "Tag")
+		{
+			for (int i = 0; i < mtd; i++)
+			{
+				if (tasks[i].getTag() == seekingFor)
+				{
+					return tasks[i];
+				}
+			}
+		}
+
+		if (seekingItemType == "date" || seekingItemType == "Date")
+		{
+			seekingFor = "finish until: " + seekingFor;
+			for (int i = 0; i < mtd; i++)
+			{
+				if (tasks[i].getDate() == seekingFor)
+				{
+					return tasks[i];
+				}
+			}
+		}
 	}
 
 	~To_DoList() {}
@@ -278,46 +377,6 @@ public:
 		{
 			delete To_DoList::instance;
 			To_DoList::instance = nullptr;
-		}
-	}
-
-	int getSize()
-	{
-		return mtd;
-	}
-	auto seekTask(Msg seekingFor, Msg seekingItemType)
-	{
-		if (seekingItemType == "title"||seekingItemType=="Title")
-		{
-			for (int i = 0; i < mtd; i++)
-			{
-				if (tasks[i].getTitle() == seekingFor)
-				{
-					return tasks[i];
-				}
-			}
-		}
-	
-		if (seekingItemType == "tag" || seekingItemType == "Tag")
-		{
-			for (int i = 0; i < mtd; i++)
-			{
-				if (tasks[i].getTag() == seekingFor)
-				{
-					return tasks[i];
-				}
-			}
-		}
-
-		if (seekingItemType == "date" || seekingItemType == "Date")
-		{
-			for (int i = 0; i < mtd; i++)
-			{
-				if (tasks[i].getDate() == seekingFor)
-				{
-					return tasks[i];
-				}
-			}
 		}
 	}
 
